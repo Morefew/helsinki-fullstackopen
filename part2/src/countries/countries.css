@@ -1,0 +1,44 @@
+.filter-container {
+    margin-block: 30px;
+}
+
+.single-country h2 {
+    font-size: 26px;
+    margin-bottom: 15px;
+}
+
+.single-country h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.single-country ul {
+    margin-block: 15px;
+}
+
+.single-country li {
+    font-size: 16px;
+    margin-bottom: 7px;
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.single-country img {
+    margin-top: 10px;
+}
+
+.list-country {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.list-country button {
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}

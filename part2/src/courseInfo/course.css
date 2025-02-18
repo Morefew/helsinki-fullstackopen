@@ -1,0 +1,31 @@
+.course-header {
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.course-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 20px;
+}
+
+.part {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+}
+
+.part-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.part-exercises {
+    color: #777;
+}
+
+.total {
+    font-size: 20px;
+    color: #777;
+}
