@@ -22,9 +22,9 @@ const PersonForm = ({
 
   const emptyInput = (e) => {
     e.preventDefault()
-    setName("")
-    setPhone("")
-    setPrevId(0);
+    setName("") // Correctly uses the setName function
+    setPhone("") // Correctly uses the setPhone function
+    setPrevId(0); // Correctly uses the setPrevId function
     console.log("Prev ID: ", prevId)
   }
 
