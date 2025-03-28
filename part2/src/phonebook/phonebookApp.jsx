@@ -32,7 +32,7 @@ const PersonForm = ({
     e.preventDefault();
     if (prevId) {
       onUpdatePerson(e);
-      prevId = 0;
+      setPrevId(0); // Reset prevId after update
     } else {
       onAddPerson(e);
     }
@@ -175,34 +175,21 @@ const PhonebookApp = () => {
       name: newName, phone: newPhone, id: prevId
     }
     console.log(updatedPerson)
-    if (window.confirm(
-      `${newName} already exists in the phonebook. Do you want to update their number?`
-    )) {
-      pbService.update(updatedPerson.id, updatedPerson)
-        .then(response => {
-          setNotificationStyle(false)
-          setErrorMessage(`Person ${newName} updated`)
-          errorDelay()
-          setRefreshList((prev) => !prev)
-          resetForm()
-        })
-        .catch(error => {
-          console.log(`Error updating person: ${newName} ${error.message}`)
-          setNotificationStyle(true)
-          setErrorMessage(`Information of ${newName} has been already removed from the server`)
-          errorDelay()
-          resetForm()
-        })
-    } else {
-      console.log(`Updating ${newName} cancelled`)
-      setNotificationStyle(true)
-      setErrorMessage(`Updating ${newName} cancelled`)
-      errorDelay()
-      setRefreshList((prev) => !prev)
-      setNewName('')
-      setNewPhone('')
-      setPrevId(0)
-    }
+    pbService.update(updatedPerson.id, updatedPerson)
+      .then(response => {
+        setNotificationStyle(false)
+        setErrorMessage(`Person ${newName} updated`)
+        errorDelay()
+        setRefreshList((prev) => !prev)
+        resetForm()
+      })
+      .catch(error => {
+        console.log(`Error updating person: ${newName} ${error.message}`)
+        setNotificationStyle(true)
+        setErrorMessage(`Information of ${newName} has been already removed from the server`)
+        errorDelay()
+        resetForm()
+      })
   }
 
   const selectPerson = (person) => {
@@ -263,7 +250,7 @@ const PhonebookApp = () => {
         onAddPerson={addPerson}
         onUpdatePerson={updatePerson}
         prevId={prevId}
-        setPrevID={setPrevId}
+        setPrevId={setPrevId} {/* Correctly pass setPrevId */}
       />
       <PersonList
         person={personList}
