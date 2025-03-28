@@ -1,5 +1,5 @@
 import './phonebook.css'
-import {useState, useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import pbService from './service/phonebook.js'
 
 const Filter = ({onChange}) => {
@@ -16,34 +16,54 @@ const PersonForm = ({
                       setName,
                       onUpdatePerson,
                       onAddPerson,
-                      prevId
+                      prevId,
+                      setPrevId,
                     }) => {
+
+  const emptyInput = (e) => {
+    e.preventDefault()
+    setName("")
+    setPhone("")
+    setPrevId(0);
+    console.log("Prev ID: ", prevId)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (prevId) {
       onUpdatePerson(e);
+      prevId = 0;
     } else {
       onAddPerson(e);
     }
   };
 
-  return (<form onSubmit={handleSubmit}>
-    <div className='person-form-container'>
-      <h3>Create a contact</h3>
-      name: <input value={name}
-                   onChange={e => {
-                     setName(e.target.value)
-                   }}/>
-      phone: <input value={phone}
-                    onChange={e => setPhone(e.target.value)}/>
-      {/*<div>*/}
-      <button type="submit">{prevId ? "Update" : "Save"} Contact</button>
-      {/*</div>*/}
-    </div>
-  </form>)
+  console.log("Prev ID: ", prevId)
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className='person-form-container'>
+        <h3>{!prevId ? "Create a " : "Update "} Contact</h3>
+        name: <input type="text" value={name}
+                     onChange={e => setName(e.target.value)}/>
+        phone: <input type="text" value={phone}
+                      onChange={e => setPhone(e.target.value)}/>
+        <div className='form-buttons'>
+          <button type="button" onClick={(event) => emptyInput(event)}> Clear Fields
+          </button>
+          <button type="submit">{prevId ? "Update" : "Save"} Contact</button>
+        </div>
+      </div>
+    </form>
+  )
 }
 
-const PersonList = ({person, filteredPerson, onDeletePerson, onSelectPerson}) => {
+const PersonList = ({
+                      person,
+                      filteredPerson,
+                      onDeletePerson,
+                      onSelectPerson
+                    }) => {
 
   const title = filteredPerson.length === 0 ? 'Number\'s List' : 'Filtered Numbers'
   const list = filteredPerson.length === 0 ? person : filteredPerson
@@ -82,7 +102,7 @@ const Notification = ({message, style}) => {
 const PhonebookApp = () => {
   const [personList, setPersonList] = useState([])
   const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
+  const [newPhone, setNewPhone] = useState('')
   const [prevId, setPrevId] = useState(0)
   const [filteredPerson, setFilteredPerson] = useState([])
   const [refreshList, setRefreshList] = useState(false)
@@ -92,6 +112,7 @@ const PhonebookApp = () => {
   useEffect(() => {
     pbService.getAll()
       .then(response => {
+        console.log(response)
         setPersonList(response)
       })
       .catch(error => {
@@ -103,7 +124,7 @@ const PhonebookApp = () => {
   }, [refreshList])
 
   if (!personList) {
-  console.log('personList is not loaded yet')
+    console.log('personList is not loaded yet')
     return null
   }
 
@@ -117,14 +138,14 @@ const PhonebookApp = () => {
   const addPerson = (e) => {
     e.preventDefault()
     const personObject = {
-      name: newName, phone: newNumber
+      name: newName, phone: newPhone
     }
     if (personList.some(person => person.name === newName)) {
       setNotificationStyle(true)
       setErrorMessage(`${newName} already exists in the phonebook`)
       errorDelay()
       setNewName('')
-      setNewNumber('')
+      setNewPhone('')
       return
     }
     pbService.create(personObject)
@@ -139,15 +160,21 @@ const PhonebookApp = () => {
         setErrorMessage(`Error adding new person: ${newName}`)
         console.log(`Error adding new person: ${newName} ${error.message}`)
       })
-    setNewName('')
-    setNewNumber('')
+    resetForm()
+  };
+
+  const resetForm = () => {
+    setNewName('');
+    setNewPhone('');
+    setPrevId(0);
   };
 
   const updatePerson = (e) => {
     e.preventDefault()
     const updatedPerson = {
-      name: newName, phone: newNumber, id: prevId
+      name: newName, phone: newPhone, id: prevId
     }
+    console.log(updatedPerson)
     if (window.confirm(
       `${newName} already exists in the phonebook. Do you want to update their number?`
     )) {
@@ -157,18 +184,14 @@ const PhonebookApp = () => {
           setErrorMessage(`Person ${newName} updated`)
           errorDelay()
           setRefreshList((prev) => !prev)
-          setNewName('')
-          setNewNumber('')
-          setPrevId(0)
+          resetForm()
         })
         .catch(error => {
           console.log(`Error updating person: ${newName} ${error.message}`)
           setNotificationStyle(true)
           setErrorMessage(`Information of ${newName} has been already removed from the server`)
           errorDelay()
-          setNewName('')
-          setNewNumber('')
-          setPrevId(0)
+          resetForm()
         })
     } else {
       console.log(`Updating ${newName} cancelled`)
@@ -177,7 +200,7 @@ const PhonebookApp = () => {
       errorDelay()
       setRefreshList((prev) => !prev)
       setNewName('')
-      setNewNumber('')
+      setNewPhone('')
       setPrevId(0)
     }
   }
@@ -187,9 +210,11 @@ const PhonebookApp = () => {
       console.log("No person found")
       return;
     }
+    console.log("Person Info: ", person.name, person.phone, person._id)
+    console.log(Object.keys(person))
     setNewName(person.name)
-    setNewNumber(person.phone)
-    setPrevId(person.id)
+    setNewPhone(person.phone)
+    setPrevId(person._id)
   }
 
   const filterPerson = (e) => {
@@ -201,7 +226,7 @@ const PhonebookApp = () => {
   const deletePerson = (person) => {
     if (window.confirm(`Are you sure you want to delete ${person.name}?`)) {
       console.log(`Deleting ${person.name}`)
-      pbService.deletePerson(person.id)
+      pbService.deletePerson(person._id)
         .then(() => {
           console.log('Person deleted')
           setNotificationStyle(false)
@@ -221,8 +246,7 @@ const PhonebookApp = () => {
       setErrorMessage(`Deleting ${newName} cancelled`)
       errorDelay()
       setRefreshList((prev) => !prev)
-      setNewName('')
-      setNewNumber('')
+      resetForm()
     }
   }
 
@@ -233,12 +257,13 @@ const PhonebookApp = () => {
       <Filter onChange={filterPerson}/>
       <PersonForm
         name={newName}
-        phone={newNumber}
+        phone={newPhone}
         setName={setNewName}
-        setPhone={setNewNumber}
+        setPhone={setNewPhone}
         onAddPerson={addPerson}
         onUpdatePerson={updatePerson}
         prevId={prevId}
+        setPrevID={setPrevId}
       />
       <PersonList
         person={personList}
